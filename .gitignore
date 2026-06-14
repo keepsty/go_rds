@@ -1,0 +1,66 @@
+# If you prefer the allow list template instead of the deny list, see community template:
+# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+#
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace file
+go.work
+
+# macOS
+.DS_Store
+
+# IDEs
+*.code-workspace
+.vscode/
+.idea/
+
+# Legacy paths
+goInsight/logs
+goInsight/cmd/__debug_bin
+goInsight_windows.code-workspace
+goInsight-fe/node_modules
+goInsight-fe/yarn-error.log
+goInsight/dist/
+goInsight/goinsight/dist
+goinsight/bin/
+goInsight.code-workspace
+github.goinsight.code-workspace
+
+# Project specific
+# Backend
+backend/logs/
+backend/media/
+backend/web/dist/*
+!backend/web/dist/
+!backend/web/dist/index.html
+backend/code.code-workspace
+
+# Frontend
+www/dist/
+www/node_modules/
+www/.vite/
+www/.vscode
+
+# Build artifacts
+bin/
+*.tar.gz
+*.zip
+*.sha256
+www/README.md
+logs/
+media/
+.worktrees/
