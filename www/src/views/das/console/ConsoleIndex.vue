@@ -55,7 +55,7 @@
                         class="result-table"
                         size="small"
                         bordered
-                        row-key="__goinsightRowKey"
+                        row-key="__GoRDSRowKey"
                         :data-source="uiData.tableData"
                         :scroll="tableScroll"
                       >
@@ -332,7 +332,7 @@ const renderResultTable = (value) => {
     uiData.tableColumns = value.columns || []
     uiData.tableData = (value.data || []).map((row, index) => ({
       ...(row || {}),
-      __goinsightRowKey: index + 1,
+      __GoRDSRowKey: index + 1,
     }))
     uiData.resultTab = 'result'
     nextTick(recomputeTableBodyHeight)

@@ -12,8 +12,8 @@
       @breakpoint="handleBreakpoint"
     >
       <div class="logo-wrap">
-        <img v-if="uiState.collapsed" class="logo-icon" src="@/assets/logo-icon.svg" alt="GoInsight" />
-        <img v-else class="logo" src="@/assets/logo.svg" alt="GoInsight" />
+        <img v-if="uiState.collapsed" class="logo-icon" src="@/assets/logo-icon.svg" alt="GoRDS" />
+        <img v-else class="logo" src="@/assets/logo.svg" alt="GoRDS" />
       </div>
       <a-menu
         class="layout-menu"
