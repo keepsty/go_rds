@@ -14,7 +14,7 @@
           <a-form-item
             label="消息通知地址前缀"
             name="notice_url"
-            extra="用于拼接通知中的工单跳转地址，例如：https://goinsight.example.com/orders/{id}"
+            extra="用于拼接通知中的工单跳转地址，例如：https://GoRDS.example.com/orders/{id}"
             :rules="[
               { required: true, message: '请输入通知地址前缀', trigger: ['blur', 'change'] },
               { validator: validateNoticeURL, trigger: 'blur' },
@@ -22,7 +22,7 @@
           >
             <a-input
               v-model:value="formState.notice_url"
-              placeholder="例如：https://goinsight.example.com"
+              placeholder="例如：https://GoRDS.example.com"
               @blur="handleAutoSave('notice_url')"
             />
           </a-form-item>
@@ -133,7 +133,7 @@
                   <a-input
                     v-model:value="formState.dingtalk.keywords"
                     :placeholder="
-                      formState.dingtalk.enable ? '启用后此项必填（机器人关键字）' : '例如：GoInsight'
+                      formState.dingtalk.enable ? '启用后此项必填（机器人关键字）' : '例如：GoRDS'
                     "
                     @blur="handleAutoSave('dingtalk')"
                   />

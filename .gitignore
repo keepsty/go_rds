@@ -29,16 +29,16 @@ go.work
 .idea/
 
 # Legacy paths
-goInsight/logs
-goInsight/cmd/__debug_bin
-goInsight_windows.code-workspace
-goInsight-fe/node_modules
-goInsight-fe/yarn-error.log
-goInsight/dist/
-goInsight/goinsight/dist
-goinsight/bin/
-goInsight.code-workspace
-github.goinsight.code-workspace
+GoRDS/logs
+GoRDS/cmd/__debug_bin
+GoRDS_windows.code-workspace
+GoRDS-fe/node_modules
+GoRDS-fe/yarn-error.log
+GoRDS/dist/
+GoRDS/GoRDS/dist
+GoRDS/bin/
+GoRDS.code-workspace
+github.GoRDS.code-workspace
 
 # Project specific
 # Backend

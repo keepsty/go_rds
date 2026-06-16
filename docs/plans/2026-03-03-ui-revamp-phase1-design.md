@@ -1,4 +1,4 @@
-# GoInsight UI Revamp Phase 1 Design
+# GoRDS UI Revamp Phase 1 Design
 
 Date: 2026-03-03
 Owner: Codex + @fuzongfei

@@ -1,14 +1,14 @@
-# 🚀 GoInsight
+# 🚀 GoRDS
 
 <p align="center">
   <img src="https://img.shields.io/static/v1?label=License&message=MIT&color=2ea44f&style=flat-square" />
-  <a href="https://github.com/keepsty/go_cmdb/releases">
-    <img src="https://img.shields.io/github/v/release/keepsty/go_cmdb.svg?style=flat-square&color=orange" />
+  <a href="https://github.com/keepsty/go_rds/releases">
+    <img src="https://img.shields.io/github/v/release/keepsty/go_rds.svg?style=flat-square&color=orange" />
   </a>
-  <a href="https://github.com/keepsty/go_cmdb/releases">
-    <img src="https://img.shields.io/github/downloads/keepsty/go_cmdb/total.svg?style=flat-square&color=blue" />
+  <a href="https://github.com/keepsty/go_rds/releases">
+    <img src="https://img.shields.io/github/downloads/keepsty/go_rds/total.svg?style=flat-square&color=blue" />
   </a>
-  <img src="https://img.shields.io/github/stars/keepsty/go_cmdb?style=flat-square&logo=github" />
+  <img src="https://img.shields.io/github/stars/keepsty/go_rds?style=flat-square&logo=github" />
 </p>
 
 <p align="center">
@@ -23,11 +23,11 @@
 
 ## 📖 项目简介
 
-**GoInsight** 是一个基于 **Gin + Vue3** 的开发企业级数据库WEB管理平台，提供**数据库工单**和**数据查询**能力，解决DBA与开发人员之间协作低效、操作高危、审计缺失等痛点。
+**GoRDS** 是一个基于 **Gin + Vue3** 的开发企业级数据库WEB管理平台，提供**数据库工单**和**数据查询**能力，解决DBA与开发人员之间协作低效、操作高危、审计缺失等痛点。
 
 ## 🗺️ 文档与预览
 
-* 📌 [功能预览](https://github.com/keepsty/go_cmdb/wiki/Screenshots)
+* 📌 [功能预览](https://github.com/keepsty/go_rds/wiki/Screenshots)
 
 ## 🛠️ 核心功能模块
 
@@ -53,12 +53,12 @@
 
 ### 1. 下载二进制包
 
-前往 [Releases](https://github.com/keepsty/go_cmdb/releases) 页面获取最新的安装包。
+前往 [Releases](https://github.com/keepsty/go_rds/releases) 页面获取最新的安装包。
 
 ### 2. 启动服务
 
 ```bash
-./goinsight-linux-amd64 -config config.yaml
+./GoRDS-linux-amd64 -config config.yaml
 ```
 
 ### 3. 访问系统
@@ -69,7 +69,7 @@
 
 * 默认密码： 1234.Com!
 
-⚠️ 安全建议： 首次登录请立即修改密码。生产环境强烈建议在 GoInsight 前置部署 Nginx 并配置 HTTPS 反向代理。
+⚠️ 安全建议： 首次登录请立即修改密码。生产环境强烈建议在 GoRDS 前置部署 Nginx 并配置 HTTPS 反向代理。
 
 ## 🤝 联系与支持
 

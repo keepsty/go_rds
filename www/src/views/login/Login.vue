@@ -72,7 +72,7 @@
           </a-form>
 
           <div class="login-footer">
-            <span>© 2025 goInsight</span>
+            <span>© 2025 GoRDS</span>
           </div>
         </div>
       </section>
