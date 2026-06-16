@@ -29,20 +29,20 @@ go.work
 .idea/
 
 # Legacy paths
-GoRDS/logs
-GoRDS/cmd/__debug_bin
-GoRDS_windows.code-workspace
-GoRDS-fe/node_modules
-GoRDS-fe/yarn-error.log
-GoRDS/dist/
-GoRDS/GoRDS/dist
-GoRDS/bin/
-GoRDS.code-workspace
-github.GoRDS.code-workspace
+go_rds/logs
+backend/logs
+go_rds/cmd/__debug_bin
+go_rds_windows.code-workspace
+
+go_rds/dist/
+go_rds/go_rds/dist
+go_rds/bin/
+go_rds.code-workspace
+github.go_rds.code-workspace
 
 # Project specific
 # Backend
-backend/logs/
+backend/logs/*
 backend/media/
 backend/web/dist/*
 !backend/web/dist/

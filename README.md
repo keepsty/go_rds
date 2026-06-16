@@ -75,6 +75,3 @@
 
 如果您在使用过程中发现 Bug 或有功能建议，欢迎提交 Issue 或 Pull Request。
 
-* 📧 Email: <1126227133@qq.com>
-
-* 💬 微信: keepsty
