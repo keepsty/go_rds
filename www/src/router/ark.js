@@ -3,6 +3,7 @@ import { markRaw } from 'vue'
 
 import ACCOUNT from '@/views/account/route'
 import ADMIN from '@/views/admin/route'
+import CLUSTER from '@/views/cluster/route'
 import DAS from '@/views/das/route'
 import ORDERS from '@/views/orders/route'
 
@@ -43,6 +44,7 @@ export const asyncRoutes = [
       },
       // 普通用户路由
       ACCOUNT,
+      CLUSTER,
       DAS,
       ORDERS,
     ],
