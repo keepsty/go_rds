@@ -42,7 +42,7 @@ github.go_rds.code-workspace
 
 # Project specific
 # Backend
-backend/logs/
+backend/logs/*
 backend/media/
 backend/web/dist/*
 !backend/web/dist/
