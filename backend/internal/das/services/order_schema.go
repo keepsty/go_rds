@@ -1,0 +1,33 @@
+package services
+
+import (
+	"github.com/keepsty/go_rds/internal/global"
+
+	"github.com/keepsty/go_rds/internal/das/forms"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+)
+
+type OrderSchemasResult struct {
+	InstanceID uuid.UUID `json:"instance_id"`
+	Schema     string    `json:"schema"`
+	Remark     string    `json:"remark"`
+}
+
+type GetOrderSchemasService struct {
+	*forms.GetOrderSchemasForm
+	C *gin.Context
+}
+
+func (s *GetOrderSchemasService) Run() ([]OrderSchemasResult, error) {
+	var results []OrderSchemasResult
+	global.App.DB.Table("`insight_instance_schemas` a").
+		Select("a.`instance_id`, a.`schema`, b.`remark`").
+		Joins("join `insight_instances` b on a.instance_id = b.instance_id").
+		Joins("join `insight_instance_environments` c on b.environment = c.id").
+		Where("c.name=?", s.Environment).
+		Group("a.`instance_id`, a.`schema`, b.`remark`").
+		Scan(&results)
+	return results, nil
+}

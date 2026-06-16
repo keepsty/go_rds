@@ -1,0 +1,162 @@
+datadir="{{ proxysql_datadir }}"
+
+admin_variables=
+{
+        admin_credentials="admin:{{ admin_password }};cluster:{{ cluster_password }};dba:{{ dba_password }}"
+        cluster_username="cluster"
+        cluster_password="{{ cluster_password }}"
+        cluster_mysql_query_rules_save_to_disk="true"
+        cluster_mysql_servers_save_to_disk="true"
+        cluster_mysql_users_save_to_disk="true"
+        cluster_proxysql_servers_save_to_disk="true"
+        cluster_mysql_query_rules_diffs_before_sync="3"
+        cluster_mysql_servers_diffs_before_sync="3"
+        cluster_mysql_users_diffs_before_sync="3"
+        cluster_proxysql_servers_diffs_before_sync="3"
+        stats_credentials="stats:{{ stats_password }};check_alive:{{ check_alive_password }}"
+        mysql_ifaces="0.0.0.0:{{ proxysql_admin_port }}"
+}
+
+mysql_variables=
+{
+        threads=4
+        max_connections=2048
+        default_query_delay=0
+        default_query_timeout=36000000
+        have_compress=true
+        poll_timeout=2000
+        interfaces="0.0.0.0:1{{ proxysql_admin_port }}"
+        default_schema="information_schema"
+        stacksize=1048576
+        server_version="5.7.29"
+        connect_timeout_server=3000
+        monitor_username="proxysql"
+        monitor_password="{{ monitor_password }}"
+        monitor_history=600000
+        monitor_connect_interval=120000
+        monitor_connect_timeout=10000
+        monitor_ping_interval=10000
+        monitor_ping_timeout=8000
+        monitor_read_only_interval=10000
+        monitor_read_only_timeout=8000
+        ping_interval_server_msec=120000
+        ping_timeout_server=500
+        commands_stats=true
+        sessions_sort=true
+        connect_retries_on_failure=10
+        default_charset="utf8mb4"
+        default_collation_connection="utf8mb4_unicode_ci"
+        client_found_rows=false
+        wait_timeout=7200000
+        monitor_slave_lag_when_null=7200
+        log_unhealthy_connections=false
+}
+
+proxysql_servers=
+(
+{% for ip in groups['proxysql'] %}
+{% if not loop.last %}
+        {hostname="{{ ip }}",port={{ proxysql_admin_port }},weight={{ hostvars[ip].weight }},comment="{{ hostvars[ip].comment }}"},
+{% elif loop.last %}
+        {hostname="{{ ip }}",port={{ proxysql_admin_port }},weight={{ hostvars[ip].weight }},comment="{{ hostvars[ip].comment }}"}
+{% endif %}
+{% endfor %}
+)
+
+mysql_group_replication_hostgroups:
+(
+    {
+        writer_hostgroup=10
+        backup_writer_hostgroup=11
+        reader_hostgroup=12
+        offline_hostgroup=13
+        active=1
+        max_writers=1
+        writer_is_also_reader=0
+        max_transactions_behind=10
+        comment=""
+    }
+)
+
+mysql_servers=
+(
+{% for ip in groups['mysql'] %}
+{% if hostvars[ip].mysql_repl_role|lower == 'master' %}
+        {
+                address="{{ ip }}"
+                port={{ mysql_port }}
+                hostgroup={{ writer_hostgroup }}
+                status="ONLINE"
+                weight=1
+                max_replication_lag=0
+                comment = "master"
+        },
+{% elif hostvars[ip].mysql_repl_role|lower == 'slave' %}
+        {
+                address="{{ ip }}"
+                port={{ mysql_port }}
+                hostgroup={{ reader_hostgroup }}
+                status="ONLINE"
+                weight=1000
+                max_replication_lag=120
+                comment = "slave"
+        },
+{% endif %}
+{% endfor %}
+)
+
+mysql_users:
+(
+       {
+                username="{{ proxysql_mysql_user_username }}"
+                password="{{ proxysql_mysql_user_password }}"
+                default_hostgroup=writer_hostgroup
+                transaction_persistent=1
+                max_connections=256
+                active=1
+       },
+       {
+                username="dbms_monitor_r"
+                password="{{ dbms_monitor_r_password }}"
+                default_hostgroup=writer_hostgroup
+                transaction_persistent=1
+                max_connections=32
+                active=1
+       },
+       {
+                username="dbms_monitor_rw"
+                password="{{ dbms_monitor_rw_password }}"
+                default_hostgroup=writer_hostgroup
+                transaction_persistent=1
+                max_connections=32
+                active=1
+       },
+       {
+                username="mha"
+                password="{{ mha_password }}"
+                default_hostgroup=writer_hostgroup
+                transaction_persistent=1
+                max_connections=32
+                active=1
+       }
+)
+
+mysql_query_rules:
+(
+    {
+        rule_id=1001
+        flagIN=0
+        flagOUT=10001
+        username="{{ proxysql_mysql_user_username }}"
+        active=1
+        apply=0
+    },
+    {
+        rule_id=10001
+        flagIN=10001
+        match_pattern="IS_FORWARD_SLAVE"
+        destination_hostgroup=11
+        active=1
+        apply=1
+    }
+)
