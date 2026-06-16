@@ -1,0 +1,142 @@
+datadir="/data/proxysql_6032"
+
+admin_variables=
+{
+        admin_credentials="admin:admin2;cluster:123123;dba:123123"
+        cluster_username="cluster"
+        ClusterPassword="123123"
+        cluster_mysql_query_rules_save_to_disk="true"
+        cluster_mysql_servers_save_to_disk="true"
+        cluster_mysql_users_save_to_disk="true"
+        cluster_proxysql_servers_save_to_disk="true"
+        cluster_mysql_query_rules_diffs_before_sync="3"
+        cluster_mysql_servers_diffs_before_sync="3"
+        cluster_mysql_users_diffs_before_sync="3"
+        cluster_proxysql_servers_diffs_before_sync="3"
+        stats_credentials="stats:123123;check_alive:123123"
+        mysql_ifaces="0.0.0.0:6032"
+}
+
+mysql_variables=
+{
+        threads=4
+        max_connections=2048
+        default_query_delay=0
+        default_query_timeout=36000000
+        have_compress=true
+        poll_timeout=2000
+        interfaces="0.0.0.0:16032"
+        default_schema="information_schema"
+        stacksize=1048576
+        server_version="5.7.29"
+        connect_timeout_server=3000
+        monitor_username="proxysql"
+        monitor_password="123123"
+        monitor_history=600000
+        monitor_connect_interval=120000
+        monitor_connect_timeout=10000
+        monitor_ping_interval=10000
+        monitor_ping_timeout=8000
+        monitor_read_only_interval=10000
+        monitor_read_only_timeout=8000
+        ping_interval_server_msec=120000
+        ping_timeout_server=500
+        commands_stats=true
+        sessions_sort=true
+        connect_retries_on_failure=10
+        default_charset="utf8"
+        client_found_rows=false
+        wait_timeout=7200000
+        monitor_slave_lag_when_null=7200
+        log_unhealthy_connections=false
+}
+
+proxysql_servers=
+(
+{hostname="",port=6032,weight=100}
+)
+
+mysql_replication_hostgroups=
+(
+        {
+                writer_hostgroup=10
+                reader_hostgroup=11
+                comment="rw split"
+        }
+)
+
+mysql_servers=
+(
+{
+address="192.168.8.167"
+port=3306
+hostgroup=10
+status="ONLINE"
+weight=1
+max_replication_lag=0
+}
+,{
+address="192.168.8.167"
+port=3306
+hostgroup=11
+status="ONLINE"
+weight=1
+max_replication_lag=0
+}
+)
+
+mysql_users:
+(
+       {
+                username="t1"
+                password="123123"
+                default_hostgroup=10
+                transaction_persistent=1
+                max_connections=256
+                active=1
+       },
+       {
+                username="monitor_r"
+                password="123123"
+                default_hostgroup=10
+                transaction_persistent=1
+                max_connections=32
+                active=1
+       },
+       {
+                username="monitor_rw"
+                password="123123"
+                default_hostgroup=10
+                transaction_persistent=1
+                max_connections=32
+                active=1
+       },
+       {
+                username="mha_user"
+                password="123123"
+                default_hostgroup=10
+                transaction_persistent=1
+                max_connections=32
+                active=1
+       }
+)
+
+mysql_query_rules:
+(
+    {
+        rule_id=1001
+        flagIN=0
+        flagOUT=10001
+        username="t1"
+        active=1
+        apply=0
+    },
+    {
+        rule_id=10001
+        flagIN=10001
+        match_pattern="IS_FORWARD_SLAVE"
+        destination_hostgroup=11
+        active=1
+        apply=1
+    }
+)

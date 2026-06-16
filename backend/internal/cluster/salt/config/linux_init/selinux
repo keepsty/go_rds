@@ -1,0 +1,10 @@
+selinux:  #ID
+  file.replace:    #Function，替换文件内容的方法
+    - name: /etc/selinux/config   #在这里是要替换内容的文件
+    - pattern: SELINUX=enforcing  #要替换的内容
+    - repl: SELINUX=disabled      #替换后的内容
+    - count: 1                    #默认为0表示表示所有的都将进行替换，这里加了整数的话就表示替换的次数不超过这个整数
+
+setenforce:
+  cmd.run:
+    - name: setenforce 0
