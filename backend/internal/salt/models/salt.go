@@ -1,5 +1,7 @@
 package models
 
+// ---------- 部署相关类型 ----------
+
 type SaltPreCheckResult struct {
 	Result bool   `json:"result"`
 	Msg    string `json:"msg"`

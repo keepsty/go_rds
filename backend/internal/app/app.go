@@ -19,6 +19,7 @@ import (
 	dasRouter "github.com/keepsty/go_rds/internal/das/routers"
 	inspectRouter "github.com/keepsty/go_rds/internal/inspect/routers"
 	ordersRouter "github.com/keepsty/go_rds/internal/orders/routers"
+	saltRouter "github.com/keepsty/go_rds/internal/salt/routers"
 	userRouter "github.com/keepsty/go_rds/internal/users/routers"
 
 	"github.com/gin-gonic/gin"
@@ -101,6 +102,7 @@ func RunServer() {
 		dasRouter.Routers,
 		ordersRouter.Routers,
 		clusterRouter.Routers,
+		saltRouter.Routers,
 	)
 
 	// Initialize router

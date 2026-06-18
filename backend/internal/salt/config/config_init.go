@@ -9,7 +9,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/keepsty/go_rds/internal/cluster/models"
+	"github.com/keepsty/go_rds/internal/salt/models"
 )
 
 func PathExists(path string) (bool, error) {
