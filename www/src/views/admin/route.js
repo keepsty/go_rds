@@ -96,6 +96,12 @@ const route = {
           component: () => import('./system/das/DasTableList.vue'),
           meta: { title: '数据访问', icon: 'CheckCircleOutlined', keepAlive: true, hidden: true },
         },
+        {
+          name: `view.admin.salt.templates`,
+          path: '/admin/salt/templates',
+          component: () => import('./salt/TemplateList.vue'),
+          meta: { title: 'Salt模版', icon: 'ThunderboltOutlined', keepAlive: true },
+        },
       ],
     },
   ],

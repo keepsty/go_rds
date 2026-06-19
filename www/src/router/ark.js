@@ -6,6 +6,7 @@ import ADMIN from '@/views/admin/route'
 import CLUSTER from '@/views/cluster/route'
 import DAS from '@/views/das/route'
 import ORDERS from '@/views/orders/route'
+import SALT from '@/views/salt/route'
 
 export const staticRoutes = [
   {
@@ -47,6 +48,7 @@ export const asyncRoutes = [
       CLUSTER,
       DAS,
       ORDERS,
+      SALT,
     ],
   },
 ]

@@ -13,9 +13,11 @@ import (
 	dasModels "github.com/keepsty/go_rds/internal/das/models"
 	inspectModels "github.com/keepsty/go_rds/internal/inspect/models"
 	ordersModels "github.com/keepsty/go_rds/internal/orders/models"
+	saltModels "github.com/keepsty/go_rds/internal/salt/models"
 	usersModels "github.com/keepsty/go_rds/internal/users/models"
 
 	"github.com/redis/go-redis/v9"
+	"gorm.io/datatypes"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/plugin/dbresolver"
@@ -87,6 +89,7 @@ func initializeMySQLGorm() *gorm.DB {
 		initializeAdminUser(db)
 		// 初始化通知配置
 		initializeNotifySettings(db)
+		initializeSaltTemplates(db)
 		return db
 	}
 }
@@ -121,6 +124,10 @@ func initializeTables(db *gorm.DB) {
 		&ordersModels.InsightApprovalRecords{},
 		&ordersModels.InsightApprovalFlowUsers{},
 		&ordersModels.InsightOrderLogs{},
+		// salt
+		&saltModels.InsightSaltTemplates{},
+		&saltModels.SaltHostConfig{},
+		&saltModels.SaltTask{},
 	)
 	if err != nil {
 		global.App.Log.Fatal("migrate table failed", err.Error())
@@ -394,4 +401,35 @@ func defaultNoticeURL() string {
 		return strings.TrimRight(address, "/")
 	}
 	return "http://" + strings.TrimRight(address, "/")
+}
+
+// 初始化 Salt 部署模板
+func initializeSaltTemplates(db *gorm.DB) {
+	templates := []saltModels.InsightSaltTemplates{
+		{
+			Name: "cmd-run", Title: "远程执行命令",
+			Description: "在目标主机上同步执行 shell 命令并返回结果",
+			FieldsSchema: datatypes.JSON(`[{"key":"command","label":"命令","type":"text","required":true,"description":"要执行的 shell 命令"}]`),
+			Defaults:     datatypes.JSON(`{}`),
+		},
+		{
+			Name: "state-apply", Title: "Salt State 部署",
+			Description: "在目标主机上应用 Salt state.sls 文件",
+			FieldsSchema: datatypes.JSON(`[{"key":"state_file","label":"State文件","type":"string","required":true,"description":"不含 .sls 后缀"},{"key":"saltenv","label":"环境","type":"string","default":"base","description":"Salt 环境"}]`),
+			Defaults:     datatypes.JSON(`{"saltenv":"base"}`),
+		},
+		{
+			Name: "mysql-deploy", Title: "MySQL 实例部署",
+			Description: "在目标主机上部署 MySQL 实例（需先上传配置到 Salt Master）",
+			FieldsSchema: datatypes.JSON(`[{"key":"port","label":"端口","type":"number","required":true,"default":3306},{"key":"version","label":"版本","type":"string","required":true,"default":"8.0"},{"key":"datadir","label":"数据目录","type":"string","default":"/data/mysql"}]`),
+			Defaults:     datatypes.JSON(`{"port":3306,"version":"8.0","datadir":"/data/mysql"}`),
+		},
+	}
+	for _, t := range templates {
+		var existing saltModels.InsightSaltTemplates
+		err := db.Where("name = ?", t.Name).First(&existing).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			db.Create(&t)
+		}
+	}
 }

@@ -26,8 +26,8 @@ func (g *GetOrderTablesService) getMySQLMetaData(r *InstanceCfg) (data *[]map[st
 		from 
 			information_schema.tables
 		where 
-			table_schema='%s' and table_name not regexp '^_(.*)[_ghc|_gho|_del]$'
-		`, r.Schema)
+			table_schema=%s and table_name not regexp '^_(.*)[_ghc|_gho|_del]$'
+		`, quoteStringLiteral(r.Schema))
 	db := dao.DB{
 		User:     r.User,
 		Password: r.PlainPassword,
@@ -52,8 +52,8 @@ func (g *GetOrderTablesService) getClickHouseMetaData(r *InstanceCfg) (data *[]m
 	from 
 		system.tables 
 	where 
-		(database = '%s')
-	`, r.Schema)
+		(database = %s)
+	`, quoteStringLiteral(r.Schema))
 
 	db := dao.ClickhouseDB{
 		User:     r.User,
@@ -88,3 +88,4 @@ func (s *GetOrderTablesService) Run() (responseData *[]map[string]interface{}, e
 
 	return responseData, nil
 }
+

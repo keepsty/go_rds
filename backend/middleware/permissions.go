@@ -31,6 +31,8 @@ func HasAdminPermission() gin.HandlerFunc {
 		if !user.IsSuperuser {
 			global.App.Log.WithFields(logrus.Fields{"request_id": requestid.Get(c), "username": username}).Error("您不是超级管理员.")
 			c.AbortWithStatusJSON(403, gin.H{"code": 403, "msg": "无权限", "data": nil, "request_id": requestid.Get(c)})
+			c.Abort()
+			return
 		}
 		// Call the next handler in the chain
 		c.Next()

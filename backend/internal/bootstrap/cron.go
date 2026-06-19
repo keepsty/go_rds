@@ -32,7 +32,5 @@ func InitializeCron() {
 			global.App.Log.Error(err)
 		}
 		global.App.Cron.Start()
-		defer global.App.Cron.Stop()
-		select {}
 	}()
 }

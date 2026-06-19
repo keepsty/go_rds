@@ -1,5 +1,61 @@
 package models
 
+import (
+	"github.com/keepsty/go_rds/internal/common/models"
+	"gorm.io/datatypes"
+)
+
+// ---------- 部署模板 ----------
+
+// InsightSaltTemplates Salt 部署任务模板
+type InsightSaltTemplates struct {
+	*models.Model
+	Name         string         `gorm:"type:varchar(64);not null;uniqueIndex:uniq_name;comment:模板标识" json:"name"`
+	Title        string         `gorm:"type:varchar(128);not null;comment:模板标题" json:"title"`
+	Description  string         `gorm:"type:varchar(512);not null;default:'';comment:模板描述" json:"description"`
+	FieldsSchema datatypes.JSON `gorm:"type:json;comment:字段定义JSON" json:"fields_schema"`
+	Defaults     datatypes.JSON `gorm:"type:json;comment:默认值JSON" json:"defaults"`
+}
+
+func (InsightSaltTemplates) TableName() string {
+	return "insight_salt_templates"
+}
+
+// ---------- 主机配置 ----------
+
+// SaltHostConfig 主机配置
+type SaltHostConfig struct {
+	*models.Model
+	Name        string         `gorm:"type:varchar(128);not null;uniqueIndex:uniq_name;comment:配置名称" json:"name"`
+	Hosts       datatypes.JSON `gorm:"type:json;comment:主机列表JSON" json:"hosts"`
+	Description string         `gorm:"type:varchar(512);not null;default:'';comment:描述" json:"description"`
+}
+
+func (SaltHostConfig) TableName() string {
+	return "insight_salt_host_configs"
+}
+
+// ---------- 部署任务 ----------
+
+// SaltTask 部署任务
+type SaltTask struct {
+	*models.Model
+	Name         string         `gorm:"type:varchar(128);not null;index;comment:任务名称" json:"name"`
+	TemplateName string         `gorm:"type:varchar(64);not null;comment:模板标识" json:"template_name"`
+	HostConfigID uint64         `gorm:"not null;comment:主机配置ID" json:"host_config_id"`
+	ConfigParams datatypes.JSON `gorm:"type:json;comment:任务配置参数" json:"config_params"`
+	Status       string         `gorm:"type:varchar(32);not null;default:'pending';comment:状态 pending/approved/running/success/failed" json:"status"`
+	CreatedBy    string         `gorm:"type:varchar(64);not null;comment:创建人" json:"created_by"`
+	ApprovedBy   string         `gorm:"type:varchar(64);not null;default:'';comment:审批人" json:"approved_by"`
+	RunOutput    datatypes.JSON `gorm:"type:json;comment:执行输出" json:"run_output"`
+	StartedAt    *models.LocalTime `gorm:"comment:开始时间" json:"started_at"`
+	FinishedAt   *models.LocalTime `gorm:"comment:完成时间" json:"finished_at"`
+}
+
+func (SaltTask) TableName() string {
+	return "insight_salt_tasks"
+}
+
 // ---------- 部署相关类型 ----------
 
 type SaltPreCheckResult struct {

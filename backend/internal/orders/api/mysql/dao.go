@@ -51,7 +51,7 @@ func DaoMySQLQuery(db *sql.DB, query string) (*[]map[string]interface{}, error) 
 	// Get column names
 	columns, error := rows.Columns()
 	if error != nil {
-		return nil, err
+		return nil, error
 	}
 	// Prepare data slices
 	vals := make([]interface{}, len(columns))
@@ -127,7 +127,10 @@ func DaoMySQLGetConnectionID(db *sql.DB) (connectionID int64, err error) {
 	// Expect only one row to be returned
 	row := (*data)[0]
 	// Extract the "CONNECTION_ID" value from the first row
-	connectionIDStr := row["CONNECTION_ID"].(string)
+	connectionIDStr, ok := row["CONNECTION_ID"].(string)
+	if !ok {
+		return connectionID, errors.New("Failed to get connection ID: invalid or missing value")
+	}
 	// Attempt to parse the string value as a 64-bit integer
 	connectionID, err = strconv.ParseInt(connectionIDStr, 10, 64)
 	if err != nil {
@@ -194,8 +197,16 @@ func DaoMySQLGetBinlogPos(db *sql.DB) (file string, position int64, err error) {
 	// Expect to return one row of data
 	row := (*data)[0]
 	// Parse the file and position from the row data
-	file = row["File"].(string)
-	position, err = strconv.ParseInt(row["Position"].(string), 10, 64)
+	file, ok := row["File"].(string)
+	if !ok {
+		return file, position, errors.New("Failed to get MySQL position: invalid File value")
+	}
+	var posStr string
+	posStr, ok = row["Position"].(string)
+	if !ok {
+		return file, position, errors.New("Failed to get MySQL position: invalid Position value")
+	}
+	position, err = strconv.ParseInt(posStr, 10, 64)
 	if err != nil {
 		return file, position, errors.New("Failed to get MySQL position: position parsing error")
 	}

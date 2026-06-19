@@ -58,7 +58,7 @@ func (d *DB) Query(query string) (*[]string, *[]map[string]interface{}, error) {
 	// 获取列名
 	columns, error := rows.Columns()
 	if error != nil {
-		return nil, nil, err
+		return nil, nil, error
 	}
 	// Make a slice
 	vals := make([]interface{}, len(columns))

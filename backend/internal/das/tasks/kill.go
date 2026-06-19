@@ -90,9 +90,16 @@ func (k *KillTiDBQuery) kill(row tidbQueryRecord) {
 		return
 	}
 	for _, d := range *data {
-		var killUser string = d["USER"].(string)
+		killUser, ok := d["USER"].(string)
+		if !ok {
+			continue
+		}
 		if killUser == row.User {
-			queryID, _ := strconv.Atoi(d["ID"].(string))
+			idStr, ok := d["ID"].(string)
+			if !ok {
+				continue
+			}
+			queryID, _ := strconv.Atoi(idStr)
 			query := fmt.Sprintf("kill tidb query %d", queryID)
 			ctx, cancel := context.WithTimeout(context.Background(), 3000*time.Millisecond)
 			defer cancel()

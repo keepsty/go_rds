@@ -54,7 +54,11 @@ func CreateSchemaRecord(instanceID uuid.UUID, row map[string]interface{}) {
 	result := global.App.DB.Table("insight_instance_schemas").Where("`instance_id`=? and `schema`=?", instanceID, row["TABLE_SCHEMA"]).First(&schemas)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			schema := models.InsightInstanceSchemas{InstanceID: instanceID, Schema: row["TABLE_SCHEMA"].(string)}
+			schemaVal, ok := row["TABLE_SCHEMA"].(string)
+			if !ok {
+				return
+			}
+			schema := models.InsightInstanceSchemas{InstanceID: instanceID, Schema: schemaVal}
 			global.App.DB.Create(&schema)
 		}
 	} else {
@@ -74,7 +78,11 @@ func CheckSourceSchemasIsDeleted(instanceID uuid.UUID, data *[]map[string]interf
 	// 获取源schemas
 	var sourceSchemas []string
 	for _, row := range *data {
-		sourceSchemas = append(sourceSchemas, row["TABLE_SCHEMA"].(string))
+		schemaVal, ok := row["TABLE_SCHEMA"].(string)
+		if !ok {
+			continue
+		}
+		sourceSchemas = append(sourceSchemas, schemaVal)
 	}
 	// 从库里读取指定cid的schemas
 	type Result struct {

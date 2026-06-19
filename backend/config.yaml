@@ -16,7 +16,7 @@ log:
 database:
     driver: "mysql" # 数据库驱动
     host: "127.0.0.1" # 数据库主机
-    port: 3306 # 数据库端口
+    port: 2881 # 数据库端口
     database: "go_rds" # 数据库名称
     username: "go_rds_rw" # 数据库用户名
     password: "1234.Com!" # 数据库密码

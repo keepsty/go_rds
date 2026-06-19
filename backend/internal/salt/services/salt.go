@@ -1,14 +1,18 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/keepsty/go_rds/internal/salt/models"
 	"github.com/keepsty/go_rds/internal/salt/salt"
 
 	"github.com/keepsty/go_rds/internal/global"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/datatypes"
 )
 
 // ---------- Salt 业务封装 ----------
@@ -218,6 +222,202 @@ func (s *SaltService) RawExecute(fun, tgt, arg, client string) (*salt.CmdResult,
 		return nil, fmt.Errorf("RawExecute 失败: %w", err)
 	}
 	return parseCmdResult(resp, tgt)
+}
+
+// ---------- 模板管理 ----------
+
+// GetTemplates 从数据库读取模板列表
+func GetTemplates() ([]models.InsightSaltTemplates, error) {
+	var templates []models.InsightSaltTemplates
+	result := global.App.DB.Model(&models.InsightSaltTemplates{}).Find(&templates)
+	return templates, result.Error
+}
+
+// DeployFromTemplate 根据模板名和配置执行部署，同步等待结果
+func DeployFromTemplate(name string, config map[string]interface{}, targets []string) (interface{}, error) {
+	var tmpl models.InsightSaltTemplates
+	if err := global.App.DB.Where("name = ?", name).First(&tmpl).Error; err != nil {
+		return nil, fmt.Errorf("模板 '%s' 不存在", name)
+	}
+
+	svc := NewSaltService()
+
+	switch name {
+	case "cmd-run":
+		cmd, _ := config["command"].(string)
+		if cmd == "" {
+			return nil, fmt.Errorf("命令不能为空")
+		}
+		result, err := svc.RunCommand(targets[0], cmd, false)
+		if err != nil {
+			return nil, err
+		}
+		return map[string]interface{}{
+			"success": result.Success,
+			"message": result.Error,
+			"detail":  result.Detail,
+		}, nil
+
+	case "state-apply":
+		stateFile, _ := config["state_file"].(string)
+		if stateFile == "" {
+			return nil, fmt.Errorf("state 文件不能为空")
+		}
+		result, err := svc.RunState(targets[0], stateFile, false)
+		if err != nil {
+			return nil, err
+		}
+		return map[string]interface{}{
+			"success": result.Success,
+			"message": result.Error,
+			"detail":  result.Detail,
+		}, nil
+
+	case "mysql-deploy":
+		port := int64(3306)
+		if p, ok := config["port"].(float64); ok {
+			port = int64(p)
+		}
+		version := "8.0"
+		if v, ok := config["version"].(string); ok {
+			version = v
+		}
+		hp := []*models.SaltMysqlHostPost{
+			{Port: port, Host: targets[0], Version: version},
+		}
+		si := &models.SaltMysqlServerInfo{HostPort: hp}
+		data, err := InstallMySQLHandler("prod", si, &global.App.Config.Salt)
+		if err != nil {
+			return nil, err
+		}
+		return map[string]interface{}{
+			"success": true,
+			"detail":  data,
+		}, nil
+
+	default:
+		return nil, fmt.Errorf("不支持模板类型: %s", name)
+	}
+}
+
+// CreateTemplate 创建模板
+func CreateTemplate(name, title, description, fieldsSchema, defaults string) error {
+	tmpl := models.InsightSaltTemplates{
+		Name:         name,
+		Title:        title,
+		Description:  description,
+		FieldsSchema: datatypes.JSON(fieldsSchema),
+		Defaults:     datatypes.JSON(defaults),
+	}
+	return global.App.DB.Model(&models.InsightSaltTemplates{}).Create(&tmpl).Error
+}
+
+// UpdateTemplate 更新模板
+func UpdateTemplate(id uint64, title, description, fieldsSchema, defaults string) error {
+	updates := map[string]interface{}{
+		"title":        title,
+		"description":  description,
+		"fields_schema": datatypes.JSON(fieldsSchema),
+		"defaults":     datatypes.JSON(defaults),
+	}
+	return global.App.DB.Model(&models.InsightSaltTemplates{}).Where("id=?", id).Updates(updates).Error
+}
+
+// DeleteTemplate 删除模板
+func DeleteTemplate(id uint64) error {
+	return global.App.DB.Where("id=?", id).Delete(&models.InsightSaltTemplates{}).Error
+}
+
+// ---------- 主机配置管理 ----------
+
+func GetHostConfigs() ([]models.SaltHostConfig, error) {
+	var list []models.SaltHostConfig
+	err := global.App.DB.Model(&models.SaltHostConfig{}).Find(&list).Error
+	return list, err
+}
+
+func CreateHostConfig(name, hosts, description string) error {
+	record := models.SaltHostConfig{
+		Name: name, Hosts: datatypes.JSON(hosts), Description: description,
+	}
+	return global.App.DB.Model(&models.SaltHostConfig{}).Create(&record).Error
+}
+
+func UpdateHostConfig(id uint64, name, hosts, description string) error {
+	return global.App.DB.Model(&models.SaltHostConfig{}).Where("id=?", id).Updates(map[string]interface{}{
+		"name": name, "hosts": datatypes.JSON(hosts), "description": description,
+	}).Error
+}
+
+func DeleteHostConfig(id uint64) error {
+	return global.App.DB.Where("id=?", id).Delete(&models.SaltHostConfig{}).Error
+}
+
+// ---------- 部署任务管理 ----------
+
+func GetTasks(status string) ([]models.SaltTask, error) {
+	var list []models.SaltTask
+	tx := global.App.DB.Model(&models.SaltTask{}).Order("id desc")
+	if status != "" {
+		tx = tx.Where("status = ?", status)
+	}
+	err := tx.Find(&list).Error
+	return list, err
+}
+
+func CreateTask(name, templateName string, hostConfigID uint64, configParams map[string]interface{}, createdBy string) (uint64, error) {
+	paramsJSON, _ := json.Marshal(configParams)
+	record := models.SaltTask{
+		Name: name, TemplateName: templateName,
+		HostConfigID: hostConfigID, Status: "pending",
+		ConfigParams: datatypes.JSON(paramsJSON), CreatedBy: createdBy,
+	}
+	err := global.App.DB.Model(&models.SaltTask{}).Create(&record).Error
+	return record.ID, err
+}
+
+func ApproveTask(id uint64, action, username string) error {
+	if action == "approve" {
+		return global.App.DB.Model(&models.SaltTask{}).Where("id=? AND status=?", id, "pending").
+			Updates(map[string]interface{}{"status": "approved", "approved_by": username}).Error
+	}
+	return global.App.DB.Model(&models.SaltTask{}).Where("id=? AND status=?", id, "pending").
+		Update("status", "rejected").Error
+}
+
+func RunTask(id uint64) error {
+	var task models.SaltTask
+	if err := global.App.DB.First(&task, id).Error; err != nil {
+		return fmt.Errorf("任务不存在")
+	}
+	if task.Status != "approved" {
+		return fmt.Errorf("任务未审批，无法执行")
+	}
+
+	global.App.DB.Model(&task).Updates(map[string]interface{}{
+		"status": "running", "started_at": time.Now(),
+	})
+
+	var config map[string]interface{}
+	if task.ConfigParams != nil {
+		json.Unmarshal(task.ConfigParams, &config)
+	}
+
+	result, err := DeployFromTemplate(task.TemplateName, config, []string{})
+	output, _ := json.Marshal(result)
+	now := time.Now()
+
+	if err != nil {
+		global.App.DB.Model(&task).Updates(map[string]interface{}{
+			"status": "failed", "run_output": datatypes.JSON(output), "finished_at": now,
+		})
+		return err
+	}
+
+	global.App.DB.Model(&task).Updates(map[string]interface{}{
+		"status": "success", "run_output": datatypes.JSON(output), "finished_at": now,
+	})
+	return nil
 }
 
 // ---------- GoRDS 风格的 Service 结构体 ----------
