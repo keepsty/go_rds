@@ -21,17 +21,6 @@ type SaltMysqlDep struct {
 	Xtrabackup80Tarball string `json:"xtrabackup_80_tarball"`
 }
 
-type SaltApiAuthJson struct {
-	Return []struct {
-		Token  string   `json:"token"`
-		Expire float64  `json:"expire"`
-		Start  float64  `json:"start"`
-		User   string   `json:"user"`
-		Eauth  string   `json:"eauth"`
-		Perms  []string `json:"perms"`
-	} `json:"return"`
-}
-
 type SaltMysqlServerInfo struct {
 	User         string               `json:"user"`
 	Password     string               `json:"password"`

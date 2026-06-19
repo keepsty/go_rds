@@ -9,16 +9,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 
-	"github.com/keepsty/go_rds/internal/cluster/forms"
-	"github.com/keepsty/go_rds/internal/cluster/models"
-	"github.com/keepsty/go_rds/internal/cluster/services"
 	"github.com/keepsty/go_rds/internal/global"
+	saltForms "github.com/keepsty/go_rds/internal/salt/forms"
+	saltModels "github.com/keepsty/go_rds/internal/salt/models"
+	saltServices "github.com/keepsty/go_rds/internal/salt/services"
 	"github.com/keepsty/go_rds/pkg/response"
 )
 
 // AddMySQLClusterHandler 通过SaltStack自动部署MySQL+ProxySQL集群
 func AddMySQLClusterHandler(c *gin.Context) {
-	mha := new(forms.SaltMySQLProxysqlMha)
+	mha := new(saltForms.SaltMySQLProxysqlMha)
 	if err := c.ShouldBindJSON(mha); err != nil {
 		if _, ok := err.(validator.ValidationErrors); !ok {
 			response.ValidateFail(c, "参数错误")
@@ -51,14 +51,14 @@ func AddMySQLClusterHandler(c *gin.Context) {
 
 	// 将 forms 类型转换为 models 类型
 	b, _ := json.Marshal(mha.SaltProxySqlHostPostJson)
-	var phpModel models.SaltProxySqlHostPost
+	var phpModel saltModels.SaltProxySqlHostPost
 	json.Unmarshal(b, &phpModel)
 
 	b2, _ := json.Marshal(mha.SaltMysqlServerInfoJson)
-	var siModel models.SaltMysqlServerInfo
+	var siModel saltModels.SaltMysqlServerInfo
 	json.Unmarshal(b2, &siModel)
 
-	_, err := services.SaltInstallProxysqlHandler(
+	_, err := saltServices.InstallProxysqlHandler(
 		mha.ENV,
 		&phpModel,
 		&siModel,
