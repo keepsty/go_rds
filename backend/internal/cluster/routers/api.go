@@ -27,4 +27,18 @@ func RegisterApiRoutes(cluster *gin.RouterGroup) {
 	cluster.POST("/clusters/db/query/datadict", views.ClusterGetDBDataDictHandler)
 	cluster.GET("/clusters/db/query/tableinfo", views.ClusterGetDBTableInfoHandler)
 	cluster.GET("/clusters/db/query/history", views.GetUserHistorySqlHandler)
+	// 备份管理
+	cluster.GET("/backup/configs", views.GetBackupConfigsView)
+	cluster.POST("/backup/configs", views.CreateBackupConfigView)
+	cluster.PUT("/backup/configs/:id", views.UpdateBackupConfigView)
+	cluster.DELETE("/backup/configs/:id", views.DeleteBackupConfigView)
+	cluster.GET("/backup/tasks", views.GetBackupTasksView)
+	cluster.POST("/backup/tasks", views.CreateBackupTaskView)
+	cluster.PUT("/backup/tasks/:id/status", views.UpdateBackupTaskStatusView)
+	cluster.GET("/backup/records", views.GetBackupRecordsView)
+	// 备份模板
+	cluster.GET("/backup/templates", views.GetBackupTemplatesView)
+	cluster.POST("/backup/templates", views.CreateBackupTemplateView)
+	cluster.PUT("/backup/templates/:id", views.UpdateBackupTemplateView)
+	cluster.DELETE("/backup/templates/:id", views.DeleteBackupTemplateView)
 }

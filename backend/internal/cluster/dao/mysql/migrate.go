@@ -188,6 +188,67 @@ func AutoMigrate() error {
 				INDEX idx_sg_id (servicegroup_id)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='SaltStack部署记录表'`,
 		},
+		{
+			name: "database_backup_config",
+			sql: `CREATE TABLE IF NOT EXISTS database_backup_config (
+				id BIGINT AUTO_INCREMENT PRIMARY KEY,
+				name VARCHAR(128) NOT NULL,
+				db_type VARCHAR(32) NOT NULL,
+				instance_id VARCHAR(128) NOT NULL,
+				backup_type VARCHAR(32) NOT NULL DEFAULT 'full',
+				schedule_cron VARCHAR(64) DEFAULT '',
+				retention_days INT NOT NULL DEFAULT 7,
+				storage_path VARCHAR(256) DEFAULT '',
+				status VARCHAR(32) NOT NULL DEFAULT 'enabled',
+				remark TEXT,
+				create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+				update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+		},
+		{
+			name: "database_backup_task",
+			sql: `CREATE TABLE IF NOT EXISTS database_backup_task (
+				id BIGINT AUTO_INCREMENT PRIMARY KEY,
+				config_id BIGINT NOT NULL,
+				name VARCHAR(128) NOT NULL,
+				db_type VARCHAR(32) NOT NULL,
+				backup_type VARCHAR(32) NOT NULL DEFAULT 'full',
+				instance_id VARCHAR(128) NOT NULL,
+				status VARCHAR(32) NOT NULL DEFAULT 'pending',
+				started_at DATETIME,
+				finished_at DATETIME,
+				created_by VARCHAR(64) NOT NULL,
+				create_time DATETIME DEFAULT CURRENT_TIMESTAMP
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+		},
+		{
+			name: "database_backup_record",
+			sql: `CREATE TABLE IF NOT EXISTS database_backup_record (
+				id BIGINT AUTO_INCREMENT PRIMARY KEY,
+				task_id BIGINT NOT NULL,
+				file_name VARCHAR(256) DEFAULT '',
+				file_size BIGINT DEFAULT 0,
+				file_path VARCHAR(512) DEFAULT '',
+				status VARCHAR(32) NOT NULL DEFAULT 'running',
+				output TEXT,
+				started_at DATETIME,
+				finished_at DATETIME,
+				create_time DATETIME DEFAULT CURRENT_TIMESTAMP
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+		},
+		{
+			name: "database_backup_template",
+			sql: `CREATE TABLE IF NOT EXISTS database_backup_template (
+				id BIGINT AUTO_INCREMENT PRIMARY KEY,
+				name VARCHAR(128) NOT NULL,
+				db_type VARCHAR(32) NOT NULL,
+				description TEXT,
+				config_schema TEXT NOT NULL,
+				default_config TEXT NOT NULL,
+				create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+				update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+		},
 	}
 
 	for _, t := range tables {

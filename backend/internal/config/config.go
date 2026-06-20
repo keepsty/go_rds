@@ -98,6 +98,13 @@ type Sftp struct {
 	Hostname string `mapstructure:"hostname" json:"hostname" yaml:"hostname"`
 	Port     int    `mapstructure:"port" json:"port" yaml:"port"`
 }
+// Kafka 配置
+type Kafka struct {
+	Brokers []string `mapstructure:"brokers" json:"brokers" yaml:"brokers"`
+	Topic   string   `mapstructure:"topic" json:"topic" yaml:"topic"`
+	LogDir  string   `mapstructure:"log_dir" json:"log_dir" yaml:"log_dir"`
+}
+
 
 type Configuration struct {
 	App      App      `mapstructure:"app" json:"app" yaml:"app"`
@@ -111,4 +118,5 @@ type Configuration struct {
 	ProxySQL ProxySQL `mapstructure:"proxysql" json:"proxysql" yaml:"proxysql"`
 	Salt     Salt     `mapstructure:"salt" json:"salt" yaml:"salt"`
 	Sftp     Sftp     `mapstructure:"sftp" json:"sftp" yaml:"sftp"`
+	Kafka    Kafka    `mapstructure:"kafka" json:"kafka" yaml:"kafka"`
 }

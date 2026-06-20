@@ -155,5 +155,6 @@ func Run(configFile string) {
 		}
 	}()
 	bootstrap.InitializeCron()
+	bootstrap.InitializeKafka()
 	RunServer()
 }

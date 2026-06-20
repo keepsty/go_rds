@@ -76,6 +76,46 @@ func InitializeSeedData() error {
 				(2, 11, '192.168.1.103', 3306, 'ONLINE', 1000),
 				(3, 10, '192.168.1.103', 3306, 'ONLINE', 1)`,
 		},
+		// ====== 备份模板 ======
+		{
+			name: "database_backup_template",
+			sql: `INSERT IGNORE INTO database_backup_template (id, name, db_type, description, config_schema, default_config) VALUES
+(1, 'MySQL XtraBackup全量', 'MySQL', '使用XtraBackup对MySQL实例进行全量备份，支持压缩和加密', '[{"key":"host","label":"主机","type":"string","required":true,"description":"MySQL主机地址"},{"key":"port","label":"端口","type":"number","default":3306},{"key":"user","label":"备份用户","type":"string","default":"backup"},{"key":"password","label":"密码","type":"string"},{"key":"databases","label":"备份数据库","type":"text","description":"留空则全实例备份"},{"key":"compress","label":"压缩","type":"boolean","default":true},{"key":"encrypt","label":"加密","type":"boolean","default":false}]', '{"port":3306,"user":"backup","compress":true,"encrypt":false}'),
+(2, 'Redis RDB快照', 'Redis', '通过SAVE命令创建Redis RDB快照文件并归档', '[{"key":"host","label":"主机","type":"string","required":true},{"key":"port","label":"端口","type":"number","default":6379},{"key":"password","label":"密码","type":"string"},{"key":"rdb_path","label":"RDB文件路径","type":"string","description":"Redis配置中的dir路径"},{"key":"compress","label":"压缩","type":"boolean","default":true}]', '{"port":6379,"compress":true}'),
+(3, 'TiDB Dumpling导出', 'TiDB', '使用Dumpling工具从TiDB导出SQL/CSV数据', '[{"key":"host","label":"PD地址","type":"string","required":true,"description":"TiDB PD节点地址"},{"key":"port","label":"端口","type":"number","default":4000},{"key":"user","label":"用户","type":"string","default":"root"},{"key":"password","label":"密码","type":"string"},{"key":"database","label":"数据库","type":"string","description":"留空则导出全部"},{"key":"output_format","label":"导出格式","type":"select","options":["sql","csv"],"default":"sql"},{"key":"threads","label":"线程数","type":"number","default":4}]', '{"port":4000,"user":"root","output_format":"sql","threads":4}')`,
+		},
+		// ====== 备份配置 ======
+		{
+			name: "database_backup_config",
+			sql: `INSERT IGNORE INTO database_backup_config (id, name, db_type, instance_id, backup_type, schedule_cron, retention_days, storage_path, status, remark) VALUES
+(1, '电商-core-备份', 'MySQL', '192.168.1.101:3306', 'full', '0 2 * * *', 30, '/backup/mysql/core', 'enabled', '电商核心库每日全量备份'),
+(2, '电商-core-增量', 'MySQL', '192.168.1.101:3306', 'incremental', '0 */4 * * *', 7, '/backup/mysql/core/incr', 'enabled', '电商核心库每4小时增量'),
+(3, 'Redis-缓存-备份', 'Redis', 'redis-cache-01:6379', 'full', '0 3 * * *', 14, '/backup/redis/cache', 'enabled', 'Redis缓存每日RDB快照'),
+(4, 'TiDB-支付-导出', 'TiDB', 'tidb-pd-01:4000', 'full', '0 4 * * 0', 60, '/backup/tidb/pay', 'disabled', '支付TiDB每周日凌晨导出'),
+(5, '电商-order-备份', 'MySQL', '192.168.1.101:3307', 'full', '0 1 * * *', 30, '/backup/mysql/order', 'enabled', '订单库每日全量备份')`,
+		},
+		// ====== 备份任务 ======
+		{
+			name: "database_backup_task",
+			sql: `INSERT IGNORE INTO database_backup_task (id, config_id, name, db_type, backup_type, instance_id, status, started_at, finished_at, created_by) VALUES
+(1, 1, '电商-core-备份-20260619', 'MySQL', 'full', '192.168.1.101:3306', 'success', '2026-06-19 02:00:00', '2026-06-19 03:25:00', 'admin'),
+(2, 2, '电商-core-增量-20260619-1', 'MySQL', 'incremental', '192.168.1.101:3306', 'success', '2026-06-19 06:00:00', '2026-06-19 06:08:00', 'admin'),
+(3, 2, '电商-core-增量-20260619-2', 'MySQL', 'incremental', '192.168.1.101:3306', 'success', '2026-06-19 10:00:00', '2026-06-19 10:07:00', 'admin'),
+(4, 1, '电商-core-备份-20260620', 'MySQL', 'full', '192.168.1.101:3306', 'running', '2026-06-20 02:00:00', NULL, 'admin'),
+(5, 3, 'Redis-缓存-备份-20260620', 'Redis', 'full', 'redis-cache-01:6379', 'pending', NULL, NULL, 'operator1'),
+(6, 4, 'TiDB-支付-导出-20260618', 'TiDB', 'full', 'tidb-pd-01:4000', 'failed', '2026-06-18 04:00:00', '2026-06-18 04:45:00', 'admin')`,
+		},
+		// ====== 备份记录 ======
+		{
+			name: "database_backup_record",
+			sql: `INSERT IGNORE INTO database_backup_record (id, task_id, file_name, file_size, file_path, status, output, started_at, finished_at) VALUES
+(1, 1, 'core_20260619_full.xb', 429496729600, '/backup/mysql/core/core_20260619_full.xb', 'success', 'XtraBackup completed successfully\nBackup size: 400GB\nCompression ratio: 2.1x\nDuration: 01h25m', '2026-06-19 02:00:00', '2026-06-19 03:25:00'),
+(2, 2, 'core_20260619_0600_incr.xb', 53687091200, '/backup/mysql/core/incr/core_20260619_0600_incr.xb', 'success', 'Incremental backup completed\nBackup size: 50GB\nDuration: 8m', '2026-06-19 06:00:00', '2026-06-19 06:08:00'),
+(3, 3, 'core_20260619_1000_incr.xb', 32212254720, '/backup/mysql/core/incr/core_20260619_1000_incr.xb', 'success', 'Incremental backup completed\nBackup size: 30GB\nDuration: 7m', '2026-06-19 10:00:00', '2026-06-19 10:07:00'),
+(4, 4, 'core_20260620_full.xb', 472446402560, '/backup/mysql/core/core_20260620_full.xb', 'running', 'Running xtrabackup --backup --target-dir=/backup/mysql/core/core_20260620_full', '2026-06-20 02:00:00', NULL),
+(5, 5, 'cache_20260620.rdb', 1073741824, '/backup/redis/cache/cache_20260620.rdb', 'pending', '', NULL, NULL),
+(6, 6, 'pay_20260618_dumpling.sql.gz', 85899345920, '/backup/tidb/pay/pay_20260618_dumpling.sql.gz', 'failed', 'Dumpling export failed at table pay_db.refund_2024\nCause: TiDB region timeout\nRows exported before failure: 15,342,000', '2026-06-18 04:00:00', '2026-06-18 04:45:00')`,
+		},
 	}
 
 	for _, s := range seedData {
