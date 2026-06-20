@@ -17,6 +17,12 @@ const route = {
       component: () => import('./detail/ClusterDetail.vue'),
       meta: { title: '集群详情', keepAlive: true, hidden: true },
     },
+    {
+      name: 'cluster.backup',
+      path: '/cluster/backup',
+      component: () => import('./backup/index.vue'),
+      meta: { title: '备份管理', icon: 'CloudUploadOutlined', keepAlive: true },
+    },
   ],
 }
 

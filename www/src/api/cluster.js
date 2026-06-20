@@ -22,3 +22,19 @@ export const GetQueryHistoryApi = (params) => get('/api/v1/cluster/clusters/db/q
 
 // SaltStack 自动化部署
 export const AddMySQLClusterApi = (data) => post('/api/v1/cluster/clusters/addmysqlcluster', data)
+
+// 备份管理
+export const GetBackupConfigsApi = (params) => get('/api/v1/cluster/backup/configs', params)
+export const CreateBackupConfigApi = (data) => post('/api/v1/cluster/backup/configs', data)
+export const UpdateBackupConfigApi = (id, data) => put(`/api/v1/cluster/backup/configs/${id}`, data)
+export const DeleteBackupConfigApi = (id) => del(`/api/v1/cluster/backup/configs/${id}`)
+export const GetBackupTasksApi = (params) => get('/api/v1/cluster/backup/tasks', params)
+export const CreateBackupTaskApi = (data) => post('/api/v1/cluster/backup/tasks', data)
+export const UpdateBackupTaskStatusApi = (id, data) => put(`/api/v1/cluster/backup/tasks/${id}/status`, data)
+export const GetBackupRecordsApi = (params) => get('/api/v1/cluster/backup/records', params)
+
+// 备份模板管理
+export const GetBackupTemplatesApi = (params) => get('/api/v1/cluster/backup/templates', params)
+export const CreateBackupTemplateApi = (data) => post('/api/v1/cluster/backup/templates', data)
+export const UpdateBackupTemplateApi = (id, data) => put(`/api/v1/cluster/backup/templates/${id}`, data)
+export const DeleteBackupTemplateApi = (id) => del(`/api/v1/cluster/backup/templates/${id}`)

@@ -102,6 +102,12 @@ const route = {
           component: () => import('./salt/TemplateList.vue'),
           meta: { title: 'Salt模版', icon: 'ThunderboltOutlined', keepAlive: true },
         },
+        {
+          name: `view.admin.backup.templates`,
+          path: '/admin/backup/templates',
+          component: () => import('./system/backup/TemplateList.vue'),
+          meta: { title: '备份模版', icon: 'CloudUploadOutlined', keepAlive: true },
+        },
       ],
     },
   ],
